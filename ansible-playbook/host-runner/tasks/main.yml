@@ -1,0 +1,26 @@
+---
+# tasks file for host-runner
+
+- name: register a docker in docker runner (sudo)
+  copy:
+    src: files/{{runner_config}}.toml
+    dest: /etc/gitlab-runner/config.toml
+    force: yes
+  ignore_errors: true
+  notify: 
+  - verify and add new runners
+
+- name: Create a directory .gitlab-runner for simple user if it does not exist
+  ansible.builtin.file:
+    path: /home/{{master_user}}/.gitlab-runner
+    state: directory
+    mode: '0755'
+
+- name: register a docker in docker runner ( non_sudo - {{master_user}} )
+  copy:
+    src: files/{{runner_config}}.toml
+    dest: /home/{{master_user}}/.gitlab-runner/config.toml
+    force: yes
+  ignore_errors: true
+  notify: 
+  - verify and add new runners for non-sudo user

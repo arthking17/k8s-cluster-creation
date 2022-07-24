@@ -1,0 +1,7 @@
+---
+
+- name: Apply deployment dashboard-adminuser, Dashboard, Namespaces
+  hosts: master
+  gather_facts: false
+  roles: 
+  - deployment

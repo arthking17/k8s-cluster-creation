@@ -1,0 +1,46 @@
+---
+# handlers file for docker
+  
+- name: remove old gitlab-runner
+  ansible.builtin.file:
+    path: /etc/gitlab-runner/config.toml
+    state: absent
+
+- name: register a docker in docker runner
+  shell: | 
+    gitlab-runner register -n \
+      --url https://gitlab.com/ \
+      --registration-token {{ RUNNER_TOKEN }} \
+      --executor docker \
+      --description "docker runner" \
+      --docker-image "docker:dind" \
+      --docker-privileged \
+      --tag-list docker
+  ignore_errors: true
+
+- name: register a new shell runner
+  shell: | 
+    gitlab-runner register -n \
+      --url https://gitlab.com/ \
+      --registration-token {{ RUNNER_TOKEN }} \
+      --executor shell \
+      --shell bash \
+      --description "shell runner" \
+      --tag-list shell
+  ignore_errors: true
+
+- name: register a new maven docker runner
+  shell: | 
+    gitlab-runner register -n \
+      --url https://gitlab.com/ \
+      --registration-token {{ RUNNER_TOKEN }} \
+      --executor docker \
+      --description "docker runner" \
+      --docker-image "maven:3.3-jdk-8" \
+      --docker-privileged \
+      --tag-list docker-maven
+  ignore_errors: true
+  
+- name: verify and add these runners to my gitlab repo
+  command: gitlab-runner verify
+  ignore_errors: true

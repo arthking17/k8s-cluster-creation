@@ -1,0 +1,97 @@
+---
+# tasks file for deployment
+
+- name: Recursively old deployment file
+  ansible.builtin.file:
+    path: /kube-config
+    state: absent
+
+#### Copy deployment files in master-node
+- name: copy deployment files in master node
+  copy:
+    src: deployment/files/
+    dest: /home/{{master_user}}/kube-config/
+    force: yes
+
+#### deploying network config "kube-flannel"
+- name: Create a Deployment kube-flannel (*Initialize cluster networking*)
+  command: kubectl apply -f /home/{{master_user}}/kube-config/kube-flannel.yaml
+
+#### deploying Kubernetes Dashboard
+- name: Deploying the Dashboard UI
+  command: kubectl apply -f /home/{{master_user}}/kube-config/dashboard/kubernetes-dashboard-setup.yaml
+    #- kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' --port 8001
+
+#### Create admin user for K8s Cluster
+- name: Create a Deployment dashboard-adminuser
+  command: kubectl apply -f /home/{{master_user}}/kube-config/dashboard/dashboard-adminuser.yaml
+
+- name: Create a Deployment cluster-role-binding
+  command: kubectl apply -f /home/{{master_user}}/kube-config/dashboard/cluster-role-binding.yaml
+
+#### deploying Rancher localpath provisionner
+- name: Deploy Rancher localpath provisionner for Kubernetes
+  command: kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.22/deploy/local-path-storage.yaml
+
+#### Create namespaces
+- name: Create Namespaces 'iris-ws' && 'itss' in K8s cluster
+  command: kubectl apply -f /home/{{master_user}}/kube-config/namespaces.yaml
+
+#### deploying Kafka cluster
+- name: clone kafka-deployment-template repo
+  git:
+    repo: https://{{ GITLAB_USERNAME }}:{{ TOKEN_RUNNER_IRIS_T24 }}@gitlab.com/i3017/kafka-deployment-template.git
+    dest: /home/{{master_user}}/kafka-deployment-template
+    clone: yes
+    update: yes
+    version: prod
+
+- name: create Kafka CLuster in K8s
+  shell: cd /home/{{master_user}}/kafka-deployment-template/ && helm install kafka --set Service.Type=ClusterIP --set Namespace=iris-ws -f values.yaml .
+
+- name: Check current directory
+  command: pwd
+
+- name: clone micro-app-deployment-template repo
+  git:
+    repo: https://{{ GITLAB_USERNAME }}:{{ TOKEN_RUNNER_IRIS_T24 }}@gitlab.com/i3017/micro-app-deployment-template.git
+    dest: /home/{{master_user}}/micro-app-deployment-template
+    clone: yes
+    update: yes
+    version: prod
+
+#### deploying Customer microservices
+- name: clone customer-ws repo
+  git:
+    repo: https://{{ GITLAB_USERNAME }}:{{ TOKEN_RUNNER_IRIS_T24 }}@gitlab.com/i3017/customer-ws.git
+    dest: /home/{{master_user}}/customer-ws
+    clone: yes
+    update: yes
+    version: prod
+
+- name: deploy microservice customer-ws in K8s
+  shell: cd /home/{{master_user}}/micro-app-deployment-template/ && helm install customer-ws -f /home/{{master_user}}/customer-ws/helm-values.yml .
+
+#### deploying Account microservices
+- name: clone account-ws repo
+  git:
+    repo: https://{{ GITLAB_USERNAME }}:{{ TOKEN_RUNNER_IRIS_T24 }}@gitlab.com/i3017/account-ws.git
+    dest: /home/{{master_user}}/account-ws
+    clone: yes
+    update: yes
+    version: prod
+
+- name: deploy microservice account-ws in K8s
+  shell: cd /home/{{master_user}}/micro-app-deployment-template/ && helm install account-ws -f /home/{{master_user}}/account-ws/helm-values.yml .
+
+#### deploying IRIS Webservices
+- name: clone iris-ws repo
+  git:
+    repo: https://{{ GITLAB_USERNAME }}:{{ TOKEN_RUNNER_IRIS_T24 }}@gitlab.com/i3017/iris-ws.git
+    dest: /home/{{master_user}}/iris-ws
+    clone: yes
+    update: yes
+    version: prod
+
+- name: deploy microservice iris-ws in K8s
+  shell: cd /home/{{master_user}}/micro-app-deployment-template/ && helm install iris-ws -f /home/{{master_user}}/iris-ws/helm-values.yml .

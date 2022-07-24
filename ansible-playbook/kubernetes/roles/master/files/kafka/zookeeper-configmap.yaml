@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-configmap
+  namespace: iris-ws
+data:
+  zookeeper_url: zookeeper-service

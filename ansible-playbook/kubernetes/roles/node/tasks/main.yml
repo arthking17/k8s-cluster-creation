@@ -1,0 +1,13 @@
+---     
+- name: add daemon.json to /etc/docker/ (need that to correct issue "kubelet is not running or healthy")
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: restart system daemon & docker & kubelet
+  command: "systemctl {{item}}"
+  with_items:
+    - daemon-reload
+    - restart docker
+    - status docker
+    - status containerd

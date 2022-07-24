@@ -1,0 +1,15 @@
+---
+# handlers file for docker
+
+- name: Restart service docker, in all cases, also issue daemon-reload to pick up config changes
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker
+
+- name: allow no root user to use docker without sudo
+  command: "{{item}}"
+  with_items: 
+#  - groupadd docker
+  - usermod -aG docker {{master_user}}
+  ignore_errors: true

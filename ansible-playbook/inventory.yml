@@ -1,0 +1,25 @@
+---
+hosts:
+    master:
+        master1:
+            ansible_host: 20.223.2.134
+            ansible_ssh_user: william
+            ansible_ssh_private_key_file: /azure/.ssh/id_rsa
+    node:
+        node1:
+            ansible_host: 20.223.0.160
+            ansible_ssh_user: william
+            ansible_ssh_private_key_file: /azure/.ssh/id_rsa
+    runner:
+        ansible_host: 20.223.2.134
+        ansible_ssh_user: william
+    devops:
+        ansible_host: localhost
+        ansible_ssh_user: wi11i4m
+        ansible_connection: local
+    test:
+        ansible_host: 192.168.1.171
+        ansible_ssh_user: vagrant
+        ansible_password: vagrant
+all:
+    ansible_python_interpreter: /usr/bin/python3

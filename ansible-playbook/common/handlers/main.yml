@@ -1,0 +1,6 @@
+---
+# handlers file for common
+
+# need that to run docker login in azure VM
+- name: generate gnupg2 key
+  command: gpg2 --full-generate-key

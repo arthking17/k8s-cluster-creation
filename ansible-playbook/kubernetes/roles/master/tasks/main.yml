@@ -1,0 +1,69 @@
+---
+  - name: Initialize cluster master node
+    command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  
+  - name: remove old kubernetes config
+    command: "{{ item }}"
+    with_items:
+      - rm $HOME/.kube/config
+      - rm -r /kube-config/
+    ignore_errors: yes
+  
+  - name: create .kube dir && copy /etc/kubernetes/admin.conf to $HOME/.kube/config && edit rights of $HOME/.kube/config for master user
+    shell: "{{ item }}"
+    with_items:
+      - mkdir -p $HOME/.kube
+      - sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+      - sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    become: yes
+
+  - name: get nodes status 
+    command: kubectl get nodes
+    ignore_errors: true
+
+  - name: Generate token
+    command: kubeadm token create --print-join-command
+    register: cmd_join_cluster
+
+  - debug: var=cmd_join_cluster.stdout
+  - local_action: copy content={{ cmd_join_cluster }} dest=roles/master/vars/cmd_join_cluster.yml
+
+  - name: create kube-config folder
+    command: mkdir -p /kube-config
+
+  - name: copy deployment files in master node
+    copy:
+      src: roles/master/files/
+      dest: /kube-config/
+
+  - name: Initialize cluster networking
+    command: kubectl apply -f /kube-config/kube-flannel.yaml
+    #command: kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml
+
+  - name: Deploying the Dashboard UI
+    command: "{{item}}"
+    with_items:
+      - kubectl apply -f /kube-config/dashboard/kubernetes-dashboard-setup.yaml
+      #- kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' --port 8001
+
+  - name: create user admin to access kubernetes dashboard
+    command: "{{ item }}"
+    with_items:
+      - kubectl apply -f /kube-config/dashboard/dashboard-adminuser.yaml
+      - kubectl apply -f /kube-config/dashboard/cluster-role-binding.yaml
+
+  - name: generate token for user admin to access the kubernetes dashboard
+    shell: kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+    register: kubernetes_dashboard_token
+    ignore_errors: yes
+
+  - debug: var=kubernetes_dashboard_token.stdout
+  - local_action: copy content={{ kubernetes_dashboard_token }} dest=roles/master/vars/kubernetes_dashboard_token.yml
+
+############### deploy all the microservices app in kubernetes cluster insfrastructure
+  - name: delete the old deployments if exist
+    shell: sh /kube-config/script.sh delete
+    ignore_errors: true
+    no_log: true
+  - name: execute script with all the commands required 
+    shell: sh /kube-config/script.sh apply 

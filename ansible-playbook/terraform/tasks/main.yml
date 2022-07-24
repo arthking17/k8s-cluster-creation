@@ -1,0 +1,19 @@
+---
+# tasks file for Terraform
+- name: Add Terraform's official GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Add repo package for Terraform
+  apt_repository:
+    repo: deb [arch={{arch.stdout}}] https://apt.releases.hashicorp.com {{ lsb_release }} stable
+    state: present
+    update_cache: true
+
+- name: install Terraform
+  apt:
+    name: terraform=1.2.2
+    state: present
+    update_cache: yes
+    force: yes

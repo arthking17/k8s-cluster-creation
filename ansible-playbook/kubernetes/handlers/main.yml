@@ -1,0 +1,13 @@
+---
+# handlers file for kubernetes
+
+- name: Restart service docker, in all cases, also issue daemon-reload to pick up config changes
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker
+
+- name: Restart service containerd
+  ansible.builtin.systemd:
+    state: restarted
+    name: containerd

@@ -1,0 +1,48 @@
+concurrent = 1
+check_interval = 0
+
+[session_server]
+  session_timeout = 1800
+  
+[[runners]]
+  name = "Azure VM (master node) Shell runner"
+  url = "https://gitlab.com/"
+  token = "E1EWzQYNsgyQZF6Ai7UV"
+  executor = "shell"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+
+[[runners]]
+  name = "Azure VM (master node) Docker runner"
+  url = "https://gitlab.com/"
+  token = "DiyTiNWjXGLErAq3YrsE"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "docker:dind"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+
+[[runners]]
+  name = "Deployment in K8s (master node) - Shell Runner"
+  url = "https://gitlab.com/"
+  token = "wkQUY6sEen79gfchy9Wi"
+  executor = "shell"
+  shell = "bash"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]

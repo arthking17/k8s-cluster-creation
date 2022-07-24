@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: customer-ws-ingress
+  namespace: iris-ws
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: customer-ws
+  rules:
+  - http:
+      paths:
+      - path: /customerws
+        pathType: Prefix
+        backend:
+          service:
+            name: customer-ws-service
+            port:
+              number: 9080

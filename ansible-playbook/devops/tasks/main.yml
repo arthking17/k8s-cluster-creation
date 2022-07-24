@@ -1,0 +1,70 @@
+---
+# tasks file for devops
+- name: Add Volian's GPG key (nala)
+  apt_key:
+    url: https://deb.volian.org/volian/scar.key
+    state: present
+
+- name: Add repo package for volian (nala)
+  apt_repository:
+    repo: deb http://deb.volian.org/volian/ scar main
+    state: present
+    update_cache: true
+
+- name: install nala snapd ansible git cowsay
+  apt:
+    pkg:
+    - nala
+    - snapd
+    - cowsay
+    - fonts-firacode
+    update_cache: yes
+  ignore_errors: true
+
+- name: install vs code
+  community.general.snap:
+    name: code
+    classic: yes
+
+- name: check if google-chrome is installed
+  command: google-chrome --version
+  register: google_chrome
+  ignore_errors: true
+
+- debug: var=google_chrome
+
+- name: Downlaod the appropriate google-chrome package for my system
+  get_url:
+    url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    dest: /tmp/google-chrome-stable_current_amd64.deb
+    mode: '0440'
+  when: google_chrome.failed | bool
+
+- name: install the latest stable version of google-chrome
+  apt:
+    deb: /tmp/google-chrome-stable_current_amd64.deb
+  when: google_chrome.failed | bool
+
+- name: check if docker is installed
+  command: docker --version
+  register: get_docker_version
+  ignore_errors: true
+
+- debug: var=get_docker_version
+
+- name: Downlaod the appropriate docker-desktop package for my system
+  get_url:
+    url: https://desktop.docker.com/linux/main/amd64/docker-desktop-4.9.0-amd64.deb
+    dest: /tmp/docker-desktop-4.9.0-amd64.deb
+    mode: '0440'
+  when: get_docker_version is succeeded
+
+- name: install the latest stable version of docker-desktop
+  apt:
+    deb: /tmp/docker-desktop-4.9.0-amd64.deb
+  when: get_docker_version is succeeded
+
+- name: install postman
+  community.general.snap:
+    name: postman
+    classic: yes

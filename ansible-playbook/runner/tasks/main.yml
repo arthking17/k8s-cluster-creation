@@ -1,0 +1,21 @@
+---
+# tasks file for runner
+
+- name: check if gitlab-runner is installed
+  command: gitlab-runner -v
+  register: gitlab_runner
+  ignore_errors: true
+
+- debug: var=gitlab_runner
+
+- name: Downlaod the appropriate gitlab-runner package for my system
+  get_url:
+    url: https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_{{ arch.stdout }}.deb
+    dest: /tmp/gitlab-runner_{{ arch.stdout }}.deb
+    mode: '0440'
+  when: gitlab_runner.failed | bool
+
+- name: install the latest stable version of gitlab_runner
+  apt:
+    deb: /tmp/gitlab-runner_{{ arch.stdout }}.deb
+  when: gitlab_runner.failed | bool

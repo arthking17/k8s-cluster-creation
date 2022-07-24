@@ -1,0 +1,31 @@
+---
+# tasks file for Docker
+- name: Add Docker's official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add repo package for docker
+  apt_repository:
+    repo: deb [arch={{arch.stdout}}] https://download.docker.com/linux/ubuntu {{ lsb_release }} stable
+    state: present
+    update_cache: true
+
+- name: install docker
+  apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    update_cache: yes
+  ignore_errors: true
+  notify: 
+  - allow no root user to use docker without sudo
+
+- name: change docker cgroup driver to systemd 
+  ansible.builtin.template:
+    src: files/daemon.json
+    dest: /etc/docker/daemon.json
+  notify:
+    - Restart service docker, in all cases, also issue daemon-reload to pick up config changes
+

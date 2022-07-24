@@ -1,0 +1,43 @@
+---
+
+- name: reset kubeadm (make sure to reset kube conf in all host if a config already exist to avoid issue config already exist when trying to init master node or join a cluster)
+  command: kubeadm reset -f
+
+- name: Initialize cluster master node
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ master.apiserver_advertise_address }}
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  become: yes
+  become_user: root
+
+- name: Generate token
+  command: kubeadm token create --print-join-command
+  register: kubernetes_cmd_join_cluster
+
+- name: create directory .kube in home directory of user {{master_user}}
+  ansible.builtin.file:
+    path: /home/{{master_user}}/.kube
+    state: directory
+    mode: u+rw
+
+- name: create directory .kube in home directory of user gitlab-runner
+  ansible.builtin.file:
+    path: /home/gitlab-runner/.kube
+    state: directory
+    mode: u+rw
+
+- name: allow user {{master_user}} to run command kubectl without sudo
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{master_user}}/.kube/config
+    remote_src: yes
+    mode: u+rwx
+    force: yes
+
+- name: allow user gitlab-runner to run command kubectl without sudo
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/gitlab-runner/.kube/config
+    remote_src: yes
+    mode: u+rwx
+    force: yes

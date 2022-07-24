@@ -1,0 +1,32 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-grafana
+  namespace: prometheus
+  labels:
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/version: 8.5.3
+    helm.sh/chart: grafana-6.29.5
+  annotations:
+    meta.helm.sh/release-name: prometheus
+    meta.helm.sh/release-namespace: prometheus
+spec:
+  ports:
+    - name: http-web
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+      nodePort: 30300
+  selector:
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/name: grafana
+  type: NodePort
+  sessionAffinity: None
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  internalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

@@ -1,0 +1,57 @@
+concurrent = 1
+check_interval = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "docker runner"
+  url = "https://gitlab.com/"
+  token = "7wucf9GH2x2ea1pR3ayz"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "docker:dind"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+
+[[runners]]
+  name = "shell runner"
+  url = "https://gitlab.com/"
+  token = "yeFFAYLxbvuy8keHuwnd"
+  executor = "shell"
+  shell = "bash"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+
+[[runners]]
+  name = "docker runner"
+  url = "https://gitlab.com/"
+  token = "qQgdaQLyeCg3xQsxeLCc"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "maven:3.3-jdk-8"
+    privileged = true
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0

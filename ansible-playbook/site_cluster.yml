@@ -1,0 +1,40 @@
+---
+- name: Install and configure Kubernetes Master and Workers Node
+  hosts: 
+  - master
+  - worker
+  gather_facts: yes
+  become: yes
+  roles:
+  - common
+  - docker
+  - kubernetes
+
+- name: Install and configure Kubernetes Master Node
+  hosts: master
+  gather_facts: yes
+  become: yes
+  roles:
+  - helm
+  # start config for gitlab-runner
+  - runner
+  - ansible
+  - azure
+  - dev
+  - master-runner
+  # end config for gitlab-runner
+  - master
+
+- name: add Workers node to the cluster
+  hosts: worker
+  gather_facts: no
+  become: yes
+  roles: 
+  - worker
+
+- name: Apply deployment dashboard-adminuser, Dashboard, Namespaces
+  hosts: master
+  gather_facts: no
+  roles: 
+  - deployment
+  - prometheus

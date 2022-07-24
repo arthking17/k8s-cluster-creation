@@ -1,0 +1,16 @@
+---
+# tasks file for worker
+
+- name: reset kubeadm (make sure to reset kube conf in all host if a config already exist to avoid issue config already exist when trying to init master node or join a cluster)
+  command: kubeadm reset -f
+
+- name: whoami
+  command: whoami
+  register: whoami
+- debug: var=whoami
+
+# master is var store in global_vars who contains hostname(ip) of master host
+# - debug: var=hostvars[master]
+- name: join the cluster as node
+  command: "{{ hostvars[master_hostname]['kubernetes_cmd_join_cluster'].stdout }}"
+  ignore_errors: true

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-configmap
+  namespace: iris-ws
+data:
+  kafka_url: kafka-service

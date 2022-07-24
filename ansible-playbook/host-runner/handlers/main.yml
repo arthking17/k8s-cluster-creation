@@ -1,0 +1,12 @@
+---
+# handlers file for host-runner
+
+- name: verify and add new runners
+  command: gitlab-runner verify
+  ignore_errors: true
+
+- name: verify and add new runners for non-sudo user
+  command: gitlab-runner verify
+  ignore_errors: true
+  become: yes
+  become_user: "{{master_user}}"

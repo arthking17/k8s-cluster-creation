@@ -1,0 +1,27 @@
+---
+- name: Setup my personnal host
+  hosts: devops
+  vars:
+    #ansible_connection: local
+    arch: "{{ansible_facts.architecture}}"
+    lsb_release: "{{ansible_facts.distribution_release}}"
+    master_user: wi11i4m
+  gather_facts: yes
+  become: yes
+
+  roles:
+  - common
+  - docker
+  - azure
+  - devops
+  - dev
+  - vagrant
+  - runner
+  - ansible
+  - host-runner
+  - terraform
+  - apps
+
+  # collections:
+  # # Install collection kubernetes.core from Ansible Galaxy.
+  # - kubernetes.core

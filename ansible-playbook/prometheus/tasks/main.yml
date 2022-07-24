@@ -1,0 +1,34 @@
+---
+# tasks for prometheus role
+# need to be execute as {{ master_user }}
+
+- name: Add prometheus repositories
+  command: "{{ item }}"
+  with_items:
+  - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  - helm repo add stable https://charts.helm.sh/stable
+  notify:
+  - Update Helm repositories
+
+- name: copy helm values
+  ansible.builtin.copy:
+    src: files/values.yaml
+    dest: /tmp/values.yaml
+    owner: "{{ master_user }}"
+    mode: '0644'
+
+- name: create namespace prometheus
+  command: kubectl create namespace prometheus
+
+- name: install prometheus in Kubernetes
+  command: helm install prometheus prometheus-community/kube-prometheus-stack --namespace prometheus -f /tmp/values.yaml
+
+- name: copy prometheus-grafana.yaml file
+  ansible.builtin.copy:
+    src: files/prometheus_grafana.yaml
+    dest: /tmp/prometheus_grafana.yaml
+    owner: "{{ master_user }}"
+    mode: '0644'
+
+- name: Update deployment prometheus-grafana in Kubernetes
+  command: kubectl apply -f /tmp/prometheus_grafana.yaml

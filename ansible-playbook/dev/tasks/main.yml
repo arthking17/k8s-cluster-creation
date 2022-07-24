@@ -1,0 +1,52 @@
+---
+# tasks file for dev
+- name: Install jdk
+  apt:
+    name: openjdk-11-jdk
+    state: latest
+    update_cache: yes
+
+- name: Install maven
+  apt:
+    # lts version 3.6.3-5 in jammy repo
+    # lts version 3.6.0-1~18.04.1 in bionic repo
+    name: maven
+    state: present
+    update_cache: yes
+  ignore_errors: true
+
+- name: Install NodeSource repository package
+  ansible.builtin.shell:
+    cmd: curl -sSf https://deb.nodesource.com/setup_14.x | sudo -E bash -
+
+- name: Install nodejs
+  apt:
+    # lts version 12.22.9~dfsg-1ubuntu3 in jammy repo
+    # lts version 8.10.0~dfsg-2ubuntu0.4 in bionic repo
+    name: nodejs
+    state: latest
+    update_cache: yes
+  ignore_errors: true
+
+# nodejs installation always come with npm
+#- name: Install npm
+#  apt:
+    # lts version 8.5.1~ds-1 in jammy repo
+    # lts version 3.5.2-0ubuntu4 in bionic repo
+#    name: npm
+#    state: latest
+#    update_cache: yes
+#  ignore_errors: true
+
+- name: Install angular cli
+  community.general.npm:
+    name: '@angular/cli@13.0.0'
+    global: yes
+  ignore_errors: true
+
+#always run docker role before this task
+- name: Install docker-compose
+  apt:
+    name: docker-compose
+    state: latest
+    update_cache: yes

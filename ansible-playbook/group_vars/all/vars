@@ -1,0 +1,13 @@
+AZURE_USERNAME: william@devopswilliamoutlook.onmicrosoft.com
+AZURE_TENANT: devopswilliamoutlook.onmicrosoft.com
+
+GITLAB_USERNAME: wi11i4m
+
+arch: 'amd64'
+os_arch: "{{ansible_facts.architecture}}"
+lsb_release: "{{ansible_facts.distribution_release}}"
+
+master:
+  apiserver_advertise_address: 10.0.0.5
+master_user: 'william'
+master_hostname: "20.223.11.103"

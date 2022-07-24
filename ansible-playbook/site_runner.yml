@@ -1,0 +1,17 @@
+---
+- name: Install and configure Ansible Host
+  hosts: 
+  - runner
+  gather_facts: yes
+  become: yes
+  
+  roles:
+  - common
+  - runner
+  - ansible
+  - docker
+  - azure
+  - dev
+  - host-runner
+  - terraform
+  

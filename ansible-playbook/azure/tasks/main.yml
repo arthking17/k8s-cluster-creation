@@ -1,0 +1,29 @@
+---
+# tasks file for azure
+- name: Add azure's GPG key
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add repo package for azure-cli
+  apt_repository:
+    repo: deb [arch={{arch.stdout}}] https://packages.microsoft.com/repos/azure-cli/ {{ lsb_release }} main
+    state: present
+    update_cache: true
+
+- name: install azure-cli
+  apt:
+    name: azure-cli
+    state: latest
+    update_cache: true
+  ignore_errors: true
+  notify: 
+  - login in azure-cli
+
+- name: copy automation code for vm provisionning
+  copy:
+    src: automate-vm-deployment/
+    dest: /automate-vm-deployment/
+
+# - name: create vm host
+#   shell: chdir /automate-vm-deployment/ sh script.sh

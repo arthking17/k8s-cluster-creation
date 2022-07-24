@@ -1,0 +1,109 @@
+variables:
+  ANSIBLE_HOST_KEY_CHECKING: 'false'
+  ANSIBLE_FORCE_COLOR: 'true'
+  ANSIBLE_PYTHON_INTERPRRTER: /usr/bin/python3
+  
+  # "cloud-runner" to register runner on cloud server (Azure VM)
+  # "onpremise-runner" to register runner on onpremise server (my local machine - Lenovo)
+  RUNNER_CONFIG: "cloud-runner"
+  MASTER_USER: "wi11i4m"
+  MASTER_HOSTNAME: "20.93.120.181"
+  
+stages:   
+  - runner 
+  - cluster
+  - node
+  - devops_config
+
+runner_host:       
+  stage: runner
+  before_script:
+    - whoami
+  variables:
+    RUNNER_CONFIG: "onpremise-runner"
+  script:
+    - echo "Setup a VM to be a runner for GitLab Jobs🦿"
+    - ansible-playbook -i ${inventory} site_runner.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "runner_config=$RUNNER_CONFIG"
+  tags: 
+    - shell
+  when: manual
+
+install_config_k8s:
+  stage: cluster
+  before_script:
+    - whoami
+  script:
+    - echo "Install and configure Kubernetes and other software needed in our VM✨"
+    - ansible-playbook -i ${INVENTORY_K8S_CLUSTER} site_cluster.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "master_hostname=$MASTER_PUBLIC_IP_ADDRESS master_user=$MASTER_USER"
+  tags: 
+    - shell
+  when: manual
+
+install_k8s:
+  stage: cluster
+  before_script:
+    - whoami
+  script:
+    - echo "Install Kubernetes and other software needed in our VM✨"
+    - ansible-playbook -i ${INVENTORY_K8S_CLUSTER} site_k8s_install.yml --vault-id $ANSIBLE_VAULT_PASS
+  tags: 
+    - shell
+  when: manual
+
+config_k8s:       
+  stage: cluster
+  before_script:
+    - whoami
+  script:
+    - echo "Configure Kubernetes and other software needed in our VM✨"
+    - ansible-playbook -i ${INVENTORY_K8S_CLUSTER} site_k8s_config.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "master_hostname=$MASTER_PUBLIC_IP_ADDRESS master_user=$MASTER_USER"
+  tags: 
+    - shell
+  when: manual
+
+master_node_config:       
+  stage: node
+  before_script:
+    - whoami
+  script:
+    - echo "config of K8s Master node in Azure Cloud...🧠"
+    - ansible-playbook -i ${INVENTORY_K8S_CLUSTER} site_master.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "master_user=$MASTER_USER"
+  tags: 
+    - shell
+  when: manual
+
+worker_node_config:       
+  stage: node
+  before_script:
+    - whoami
+  script:
+    - echo "config of K8s Worker node in Azure Cloud...👷‍♂️"
+    - ansible-playbook -i ${INVENTORY_K8S_CLUSTER} site_worker.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "master_hostname=$MASTER_PUBLIC_IP_ADDRESS"
+  tags: 
+    - shell
+  when: manual
+
+devops_config:       
+  stage: devops_config
+  variables:
+    RUNNER_CONFIG: "onpremise-runner"
+  before_script:
+    - whoami
+  script:
+    - echo "Setup for my personal VM🤩"
+    - ansible-playbook -i ${inventory} site_devops.yml --vault-id $ANSIBLE_VAULT_PASS --extra-vars "runner_config=$RUNNER_CONFIG master_user=$MASTER_USER"
+  tags: 
+    - shell
+  when: manual
+
+# to be execute by non root user runner by the master node
+k8s_dashboard_access:       
+  stage: cluster
+  before_script:
+    - whoami
+  script:
+    - echo "Get Kubernetes Dashboard token from master_node...🔐"
+    - sh get_kubernetes_dashboard_access_token.sh
+  tags: 
+    - shell-in-cloud
+  when: manual

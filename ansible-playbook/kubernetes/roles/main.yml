@@ -1,0 +1,96 @@
+---
+# tasks file for kubernetes
+
+- name: Make sure that the br_netfilter module is loaded
+  shell: |
+    cat <<EOF | tee /etc/modules-load.d/k8s.conf
+    br_netfilter
+    EOF
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+  shell: |
+    cat <<EOF | tee /etc/sysctl.d/k8s.conf
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    EOF
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: modify kernel parameters at runtime
+  command: sysctl --system
+  become: yes
+
+- name: download package information from all configured sources
+  command: apt-get update
+  become: yes
+  ignore_errors: true
+
+- name: Make sure that dns server are correctly configure
+  shell: |
+    cat <<EOF | tee /etc/resolv.conf
+    nameserver 8.8.8.8
+    nameserver 8.8.4.4
+    EOF
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: Update apt package index
+  command: sudo apt-get update
+  ignore_errors: true
+
+- name: Download the Google Cloud public signing key
+  shell: sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: Add the Kubernetes apt repository
+  shell: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+- name: download package information from all configured sources
+  command: sudo apt-get update
+  ignore_errors: true
+
+- name: install kubelet, kubeadm and kubectl
+  command: sudo apt-get install -y kubelet kubeadm kubectl
+
+- name: pin their version (kubelet, kubeadm and kubectl)
+  command: sudo apt-mark hold kubelet kubeadm kubectl
+
+- name: change docker cgroup driver to systemd 
+  shell: |
+    cat <<EOF | sudo tee /etc/docker/daemon.json
+    {
+      "exec-opts": ["native.cgroupdriver=systemd"]
+    }
+    EOF
+  args:
+    executable: /bin/bash
+
+- name: updating the systemd configuration
+  command: systemctl daemon-reload
+
+- name: restart docker service
+  command: systemctl restart docker
+
+- name: disable swapp memory
+  command: sudo swapoff -a
+
+- name: reset kubeadm (make sure to reset kube conf in all host if a config already exist to avoid issue config already exist when trying to init master node or join a cluster)
+  command: kubeadm reset -f
+
+- name: Install and configure Kubernetes Master Node
+  hosts: master
+  gather_facts: yes
+  become: yes
+  roles:
+  - master
+
+- name: Install and configure Kubernetes Workers Node
+  hosts: node
+  gather_facts: yes
+  become: yes
+  roles:
+  - node

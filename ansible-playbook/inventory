@@ -1,0 +1,17 @@
+[master]
+20.223.11.103 ansible_ssh_user=william ansible_ssh_private_key_file=/azure/.ssh/id_rsa
+
+[worker]
+20.223.11.155 ansible_ssh_user=william ansible_ssh_private_key_file=/azure/.ssh/id_rsa
+
+[runner]
+52.142.94.175 ansible_ssh_user=william ansible_ssh_private_key_file=/azure/.ssh/id_rsa
+
+[test]
+192.168.1.171 ansible_ssh_user=vagrant ansible_password=vagrant
+
+[devops]
+localhost ansible_ssh_user=william ansible_connection=local
+
+[all]
+ansible_python_interpreter=/usr/bin/python3

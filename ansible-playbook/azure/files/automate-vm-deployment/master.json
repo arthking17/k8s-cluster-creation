@@ -1,0 +1,126 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "francecentral"
+        },
+        "networkInterfaceName1": {
+            "value": "master917_z1"
+        },
+        "enableAcceleratedNetworking": {
+            "value": true
+        },
+        "networkSecurityGroupName": {
+            "value": "master-nsg"
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "SSH",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22"
+                    }
+                },
+                {
+                    "name": "HTTP",
+                    "properties": {
+                        "priority": 320,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "80"
+                    }
+                }
+            ]
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "virtualNetworkName": {
+            "value": "kubernetes-cluster-vnet"
+        },
+        "addressPrefixes": {
+            "value": [
+                "10.0.0.0/16"
+            ]
+        },
+        "subnets": {
+            "value": [
+                {
+                    "name": "default",
+                    "properties": {
+                        "addressPrefix": "10.0.0.0/24"
+                    }
+                }
+            ]
+        },
+        "publicIpAddressName1": {
+            "value": "master-ip"
+        },
+        "publicIpAddressType": {
+            "value": "Static"
+        },
+        "publicIpAddressSku": {
+            "value": "Standard"
+        },
+        "pipDeleteOption": {
+            "value": "Detach"
+        },
+        "virtualMachineName": {
+            "value": "master"
+        },
+        "virtualMachineName1": {
+            "value": "master"
+        },
+        "virtualMachineComputerName": {
+            "value": "master"
+        },
+        "virtualMachineRG": {
+            "value": "kubernetes-cluster"
+        },
+        "osDiskType": {
+            "value": "Standard_LRS"
+        },
+        "osDiskDeleteOption": {
+            "value": "Delete"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_D2as_v4"
+        },
+        "nicDeleteOption": {
+            "value": "Detach"
+        },
+        "adminUsername": {
+            "value": "william"
+        },
+        "adminPublicKey": {
+            "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCaArEa5mXYfO6H6KV0ZcCkvdrtfvFDI8snWa/l6OwClRydfn7jZ00/4p368gcDSPYeQyki0VxFm58hUxzsBcqo0pnlziW+62DeLsMHX0oiP70QzYTMDFNwngGBJyO9+46M565L01kyLprTYD98YGfi5CnDYn/etJD5FubYV7cc9paDoEuVUHgdL5YfXfd3nIQlVpsxmArh5PLtzGgrKyfCTOAWD/d4JS2MRQgAq1LJHyf3p66rWqbtZuykxoWeBbS/kLjicdrJIwBvZ99xjYgKv++0AnPuXEaM3XRXgSgtxLiY305iCya0enEzdpCp2uLnP1KlzhaVwhMUIvz9FId3 william@localhost.localdomain"
+        },
+        "zone": {
+            "value": "1"
+        },
+        "loadBalancerName": {
+            "value": "kube-loadbalancer"
+        },
+        "loadbalancingRuleFrontEndPort": {
+            "value": 80
+        },
+        "loadbalancingRuleBackendEndPort": {
+            "value": 80
+        },
+        "loadbalancingRuleProtocol": {
+            "value": "Tcp"
+        }
+    }
+}

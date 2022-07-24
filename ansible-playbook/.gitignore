@@ -1,0 +1,18 @@
+### Ansible-Playbook ###
+.passwd.py
+kubernetes/.vault_pwd.txt
+kubernetes/roles/master/vars/cmd_join_cluster.yml
+kubernetes/roles/master/vars/kubernetes_dashboard_token.yml
+kubernetes/group_vars/all/vault
+
+master/vars/cmd_join_cluster.yml
+master/vars/kubernetes_dashboard_token.yml
+
+.hostpasswd.py
+
+builds/
+
+ansible_facts.yaml
+ansible_facts.yml
+
+get_helm.sh

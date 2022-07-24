@@ -1,0 +1,17 @@
+---
+# tasks file for apps
+
+- name: install stretchly
+  community.general.snap:
+    name: stretchly
+    classic: yes
+
+- name: install whatsapp
+  community.general.snap:
+    name: whatsie
+    classic: yes
+
+- name: install discord
+  community.general.snap:
+    name: discord
+    classic: yes

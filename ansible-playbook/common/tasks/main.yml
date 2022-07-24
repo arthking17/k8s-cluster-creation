@@ -1,0 +1,46 @@
+---
+# tasks file for common
+
+- name: get the architecture type of the host's OS
+  command: dpkg --print-architecture
+  register: arch
+
+- name: Make sure that dns server are correctly configure
+  ansible.builtin.template:
+    src: files/resolv.conf
+    dest: /etc/resolv.conf
+
+- name: install python3
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+
+- name: Install Python 3 and select it
+  community.general.alternatives:
+    name: python
+    path: /usr/bin/python3
+    link: /usr/bin/python
+    state: present
+  ignore_errors: true
+
+- name: install packages needed to manage  apt repository
+  apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    - apt-transport-https
+    - git
+    update_cache: yes
+  ignore_errors: true
+
+- name: install gnupg2 pass (need that to run docker login in azure VM)
+  apt:
+    pkg:
+    - gnupg2
+    - pass
+  #notify: 
+  #  - generate gnupg2 key
+

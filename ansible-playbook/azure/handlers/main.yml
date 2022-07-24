@@ -1,0 +1,5 @@
+---
+# handlers file for azure
+
+- name: login in azure-cli
+  command: az login -u {{ AZURE_USERNAME }} -p {{ AZURE_PASSWORD }} --tenant {{ AZURE_TENANT }} --allow-no-subscriptions

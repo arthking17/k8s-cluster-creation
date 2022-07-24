@@ -1,0 +1,24 @@
+---
+- name: Create a directory .gitlab-runner for simple user if it does not exist
+  ansible.builtin.file:
+    path: /home/{{master_user}}/.gitlab-runner
+    state: directory
+    mode: '0755'
+
+- name: register a new shell runner ( non_sudo - {{master_user}} )
+  copy:
+    src: files/config.toml
+    dest: /home/{{master_user}}/.gitlab-runner/config.toml
+    force: yes
+  ignore_errors: true
+  notify: 
+  - verify and add new runners for non-sudo user
+
+- name: register a new shell runner (sudo)
+  copy:
+    src: files/config.toml
+    dest: /etc/gitlab-runner/config.toml
+    force: yes
+  ignore_errors: true
+  notify: 
+  - verify and add new runners

@@ -1,0 +1,17 @@
+---
+# handlers file for master
+
+- name: verify and add new runners
+  command: sudo gitlab-runner verify
+  ignore_errors: true
+
+- name: restart containerd service
+  ansible.builtin.systemd:
+    state: restarted
+    name: containerd
+
+- name: verify and add new runners for non-sudo user
+  command: gitlab-runner verify
+  ignore_errors: true
+  become: yes
+  become_user: "{{master_user}}"

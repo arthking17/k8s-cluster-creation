@@ -1,0 +1,26 @@
+---
+- name: Install and configure Kubernetes Master and Workers Node
+  hosts: 
+  - master
+  - worker
+  gather_facts: yes
+  become: yes
+  roles:
+  - common
+  - docker
+  - kubernetes
+
+- name: Install and configure Kubernetes Master Node
+  hosts: master
+  gather_facts: yes
+  become: yes
+  roles:
+  - helm
+  # start config for gitlab-runner
+  - runner
+  - ansible
+  - azure
+  - dev
+  - master-runner
+  # end config for gitlab-runner
+  

@@ -1,0 +1,64 @@
+---
+# tasks file for ansible
+
+- name: install software-properties-common
+  apt:
+    name: software-properties-common
+    state: latest
+    update_cache: true
+
+- name: Add ansible's official GPG key
+  ansible.builtin.apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 93C4A3FD7BB9C367
+
+- name: Add ansible repository into sources list
+  ansible.builtin.apt_repository:
+    repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu {{ lsb_release }} main
+    state: present
+  ignore_errors: true
+
+- name: install ansible
+  apt:
+    name: ansible
+    state: latest
+    update_cache: true
+  ignore_errors: true
+
+- name: install latest version of module community.general
+  command: ansible-galaxy collection install community.general
+  ignore_errors: true
+
+#for old version of ansible 
+- name: install latest version of module kubernetes.core
+  command: ansible-galaxy collection install kubernetes.core
+  ignore_errors: true
+
+#for new version of ansible
+- name: install module community.kubernetes
+  command: ansible-galaxy collection install community.kubernetes
+  ignore_errors: true
+
+- name: setup azure vm ssh-key to manage servers
+  copy:
+    src: /azure
+    dest: /
+    owner: "{{master_user}}"
+    mode: '0700'
+  ignore_errors: true
+
+- name: Change file permissions of public key
+  ansible.builtin.file:
+    path: /azure/.ssh/id_rsa.pub
+    mode: '0644'
+
+- name: Change file permissions of public key
+  ansible.builtin.file:
+    path: /azure/.ssh/id_rsa
+    mode: '0600'
+
+- name: allow user *gitlab-runner* to read the ssh-key of the azure virtual machine
+  file:
+    path: /azure
+    owner: "gitlab-runner"
+  ignore_errors: true

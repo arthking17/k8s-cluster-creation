@@ -1,0 +1,43 @@
+---
+# tasks file for install vagrant
+- name: install virtual box
+  apt:
+    name: virtualbox
+    state: latest
+    update_cache: yes
+  
+- name: Add vagrant's official GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Add repo package for vagrant
+  apt_repository:
+    repo: deb [arch={{arch.stdout}}] https://apt.releases.hashicorp.com {{ lsb_release }} main
+    state: present
+    update_cache: true
+  
+- name: install vagrant
+  apt:
+    name: vagrant=2.2.19
+    state: present
+    update_cache: yes
+    force: yes
+  ignore_errors: true
+
+- name: install prerequire tools for virtualbox 
+  apt:
+    pkg:
+    - qemu
+    - qemu-kvm
+    - libvirt-clients
+    - libvirt-daemon-system
+    - virtinst
+    - bridge-utils
+    update_cache: yes
+
+- name: Enable and start service libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd
+    state: started
+    enabled: yes
